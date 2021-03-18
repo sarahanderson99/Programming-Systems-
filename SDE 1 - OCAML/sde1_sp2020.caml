@@ -1,0 +1,130 @@
+(*
+   Sarah Anderson
+   ECE 3520: Programming Systems
+   SDE 1: Hopfield Neural Network
+   Due: 2/20/2020
+*)
+
+open List;;
+
+(*----------------------------------------------------------------------------------------------*)
+(* This is a helper function for the function nextState and it finds the current state *)
+let rec find = function(i, state)->
+	if(state ==[] && i ==[])
+		then []
+	else
+		hop11Activation(List.hd i, List.hd state) :: find(List.tl i ,List.tl state); ;;
+
+(* This function finds the next state using the current state and the weightMatrix *)
+let nextState = function(currentState, weightMatrix) ->
+	if(currentState == [])
+		then []
+	else
+		find(netAll(currentState, weightMatrix), currentState);; 
+		 
+(*----------------------------------------------------------------------------------------------*)
+
+(* Returns the network state after n interations *)
+let rec updateN = function(currentState, weightMatrix, n)->
+	if(n==0)
+		then currentState
+	else 
+		updateN(nextState(currentState, weightMatrix) , weightMatrix, n-1);;
+
+(*----------------------------------------------------------------------------------------------*)
+
+(* returns true if network reaches an equilibrium state within range steps, false otherwise *)
+let rec findsEquilibrium = function(initialState, weightMatrix, range)->
+	if(range == 0)
+		then false
+	else
+		if(updateN(initialState, weightMatrix, range) = updateN(initialState, weightMatrix, range-1))
+			then true
+		else
+			false;;
+(*----------------------------------------------------------------------------------------------*)
+
+(* Finds the size of the current state *)
+let rec stateSize = function(list) ->
+	if(list = [])
+		then 0
+	else
+		stateSize(List.tl list) + 1;;
+
+(* finds the energy used in the current state *)
+let rec energy = function(state, weightMatrix) ->
+        if(weightMatrix==[])
+                then 0.
+        else
+                -(0.5) *. (List.nth state (stateSize(state) - stateSize(weightMatrix))) *. netUnit(state, List.hd weightMatrix) +. energy(state,List.tl weightMatrix);;
+(*----------------------------------------------------------------------------------------------*)
+
+(* creates the first iteration of creating a weight matrix used in hopTrainAState *)
+let rec firstLoop = function (state, value, p, x) ->
+	if(state == [])
+		then []
+	else 
+		if(x == p)
+			then 0. :: firstLoop(List.tl state, value, p, x+1)
+		else
+			(value *. List.hd state) :: firstLoop(List.tl state, value, p, x+1);;
+
+(* creates the second iteration for the weight matrix for hopTrainAState *)
+let rec secLoop = function(state, hold, p) ->
+	if(state == [])
+		then []
+	else
+		firstLoop(hold, List.hd state, p, 0) :: secLoop(List.tl state, hold, p+1);;
+
+(* creates the weight matrix for one singlar state *)
+let hopTrainAstate = function(astate) ->
+	secLoop(astate, astate, 0);;
+
+(*----------------------------------------------------------------------------------------------*)
+(* Helper function for hopTrain; the first iteration of creating the full weight matrix *)
+let rec add = function(x, y) ->
+  	if (List.tl x == []) 
+		then [(List.hd x) +. (List.hd y)]
+
+  	else 
+		(List.hd x +. List.hd y) :: add(List.tl x, List.tl y);;
+
+(* Helper function for hopTrain; the second iteration of creating the full weight matrix *)
+let rec add2 = function(x, y) ->
+  	if (List.tl x == []) 
+		then [add(List.hd x,(List.hd(List.hd y)))]
+
+	else 
+		[add(List.hd x,(List.hd(List.hd y)))] @ (add2(List.tl x, [List.tl(List.hd y)]));;
+
+(* Creating weight matrix for  all the states (not just n number of states) *)
+let rec list = function(x) ->
+  	if (List.tl x == []) 
+		then [hopTrainAstate(List.hd x)]
+
+	else 
+		[hopTrainAstate(List.hd x)] @ (list(List.tl x));;
+
+(* checks to make sure that there is a tail on the list that you are checking *)
+let rec return = function(x) ->
+ 	if (List.tl x == []) 
+		then 1
+ 	
+	else 
+		0;;
+
+let rec first = function(x) ->
+  	if (List.tl x == []) 
+		then (List.hd x)
+  	
+	else if (return(List.tl x) == 1) 
+		then (add2((List.hd x),(List.tl x)))
+  	
+	else 
+		add2((first(List.tl x)),[List.hd x]);;
+
+(* This returns weight matrix, given a list of stored states *)
+let rec hopTrain = function(allStates) -> 
+	first(list(allStates));;
+
+(*----------------------------------------------------------------------------------------------*)

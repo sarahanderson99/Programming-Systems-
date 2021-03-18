@@ -1,0 +1,48 @@
+#  nextState(os1,w);;
+- : float list = [1.; -1.; 1.; -1.]
+# nextState(os2,w);;
+- : float list = [1.; -1.; 1.; -1.]
+# nextState(os1,w2);;
+- : float list = [-1.; -1.; 1.; -1.]
+# nextState(nextState(os1,w2),w2);;
+- : float list = [-1.; -1.; 1.; -1.]
+# nextState(nextState(os1,w2),w2);;
+- : float list = [-1.; -1.; 1.; -1.]
+# updateN(oi,we,1);;
+- : float list = [1.; 1.]
+# updateN(oi,we,2);;
+- : float list = [-1.; -1.]
+# updateN(oi,we,3);;
+- : float list = [1.; 1.]
+# updateN(oi,we,4);;
+- : float list = [-1.; -1.]
+# let we=[[0.0;-1.0];[-1.0;0.0]];;
+val we : float list list = [[0.; -1.]; [-1.; 0.]]
+#  findsEquilibrium(os1,w,3);;
+- : bool = true
+# findsEquilibrium(oi,we,5);;
+- : bool = false
+# energy(os1,w);;
+- : float = -6.
+# energy(os2,w2);;
+- : float = -6.
+# hopTrainAstate(os1);;
+- : float list list =
+[[0.; -1.; 1.; -1.]; [-1.; 0.; -1.; 1.]; [1.; -1.; 0.; -1.];
+ [-1.; 1.; -1.; 0.]]
+# hopTrainAstate(os2);;
+- : float list list =
+[[0.; 1.; -1.; 1.]; [1.; 0.; -1.; 1.]; [-1.; -1.; 0.; -1.];
+ [1.; 1.; -1.; 0.]]
+# hopTrainAstate(os3);;
+- : float list list =
+[[0.; 1.; -1.; -1.]; [1.; 0.; -1.; -1.]; [-1.; -1.; 0.; 1.];
+ [-1.; -1.; 1.; 0.]]
+# let w=hopTrain([os1]);;
+val w : float list list =
+  [[0.; -1.; 1.; -1.]; [-1.; 0.; -1.; 1.]; [1.; -1.; 0.; -1.];
+   [-1.; 1.; -1.; 0.]]
+# let w2 = hopTrain([os1;os2;os3]);;
+val w2 : float list list =
+  [[0.; 1.; -1.; -1.]; [1.; 0.; -3.; 1.]; [-1.; -3.; 0.; -1.];
+   [-1.; 1.; -1.; 0.]]
